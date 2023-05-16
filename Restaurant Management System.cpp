@@ -4,6 +4,9 @@
 #include<conio.h>
 #include<string.h>
 #include <cmath>
+#include <string>
+#include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -632,7 +635,8 @@ void CustomerMain::customerPage()
 	cout<<"2. Order Food \n";
 	cout<<"3. Show Bill \n";
 	cout<<"4. Pay bill and checkout \n";
-    cout<<"5. Go to previous menu \n";
+        cout<<"5. Go to previous menu \n";
+    cout<<"6.Today's recommendation  \n";
 	d.printStar(40);
     cout<<"Enter your choice: ";
 	cin>>choice;
@@ -676,6 +680,8 @@ void CustomerMain::customerPage()
             system("cls");
             d.welcome();
             break;
+	case '6':   
+		displayDailyRecommendation();
         default:
         {
             cout<<"Enter valid option!\n";
@@ -948,6 +954,49 @@ void Display::welcome()
             welcome();
         }
     }
+}
+
+
+struct MenuItem {
+    int id;
+    std::string name;
+    float price;
+};
+
+void displayDailyRecommendation() {
+    ifstream menuFile("FoodMenu.txt");
+
+    if (!menuFile) {
+        cout << "Failed to open the menu file." << endl;
+        return;
+    // Read the menu file and store the items in a vector
+    vector<MenuItem> menuItems;
+    string line;
+    while (std::getline(menuFile, line)) {
+        if (!line.empty()) {
+            if (line.find("Item ID:") != string::npos) {
+                MenuItem item;
+                item.id = stoi(line.substr(line.find(":") + 1));
+                getline(menuFile, line); // Read the next line for item name
+                item.name = line.substr(line.find(":") + 1);
+                getline(menuFile, line); // Read the next line for item price
+                item.price = stof(line.substr(line.find(":") + 1));
+                menuItems.push_back(item);
+            }
+        }
+    }
+
+    // Generate a random index to select a recommendation
+    srand(time(nullptr));
+    int randomIndex = rand() % menuItems.size();
+    MenuItem recommendation = menuItems[randomIndex];
+
+    cout << "Today's recommendation:" <<endl;
+    cout << "Item ID: " << recommendation.id <<endl;
+    cout << "Item Name: " << recommendation.name <<endl;
+    cout << "Price: " << recommendation.price <<endl;
+
+    menuFile.close();
 }
 
 int main()
